@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartStore Pro - Mega Shopping & Enterprise Warehouse Platform</title>
+  
+  <!-- React 18 & ReactDOM CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel Compiler for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            fkBlue: '#2874f0',
+            fkBlueDark: '#1a5bb8',
+            fkYellow: '#ffe500',
+            fkOrange: '#fb641b',
+            fkGreen: '#388e3c',
+            fkBg: '#f1f2f4',
+            amzDark: '#131921',
+            amzLight: '#232f3e',
+            amzYellow: '#febd69'
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Inter Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f1f2f4;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f2f4;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .fk-shadow {
+      box-shadow: 0 2px 4px 0 rgba(0,0,0,.08);
+    }
+    .fk-card-shadow {
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    }
+    .badge-pulse {
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.05); }
+    }
+  </style>
+</head>
+<body class="bg-fkBg text-slate-800 min-h-screen selection:bg-fkBlue selection:text-white">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    const EXPANDED_CATALOG = [
+      // BEAUTY & PERSONAL CARE
+      {
+        id: 'SKU-BEAUTY-01',
+        name: 'GlowRadiance Hydrating Vitamin C Face Serum (50ml)',
+        category: 'Beauty',
+        subCategory: 'Skincare',
+        initialStock: 120,
+        soldUnits: 94,
+        stock: 26,
+        allocated: 0,
+        reorderLevel: 15,
+        unitCost: 180,
+        unitPrice: 599,
+        offerDiscount: 45,
+        rating: 4.7,
+        reviewCount: 1240,
+        location: 'Aisle B-02 (Shelf 1)',
+        image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=500&q=80',
+        description: 'Advanced antioxidant formula with 20% Pure Vitamin C & Hyaluronic Acid for skin brightening & hyperpigmentation removal.',
+        brand: 'GlowRadiance',
+        isBestSeller: true,
+        deliveryDays: 'Tomorrow, 2 PM'
+      },
+      {
+        id: 'SKU-BEAUTY-02',
+        name: 'Luxe Velvet Matte Liquid Lipstick Set (Pack of 4)',
+        category: 'Beauty',
+        subCategory: 'Makeup',
+        initialStock: 90,
+        soldUnits: 78,
+        stock: 12,
+        allocated: 0,
+        reorderLevel: 10,
+        unitCost: 220,
+        unitPrice: 899,
+        offerDiscount: 55,
+        rating: 4.6,
+        reviewCount: 890,
+        location: 'Aisle B-02 (Shelf 3)',
+        image: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=500&q=80',
+        description: 'Waterproof 16-hour long-stay matte lipsticks enriched with Vitamin E and Almond Oil.',
+        brand: 'LuxeBeauty',
+        isBestSeller: false,
+        deliveryDays: '2 Days'
+      },
+      {
+        id: 'SKU-BEAUTY-03',
+        name: 'Organic Argan Hair Damage Repair Mask & Serum Duo',
+        category: 'Beauty',
+        subCategory: 'Haircare',
+        initialStock: 75,
+        soldUnits: 65,
+        stock: 10,
+        allocated: 0,
+        reorderLevel: 8,
+        unitCost: 250,
+        unitPrice: 749,
+        offerDiscount: 35,
+        rating: 4.8,
+        reviewCount: 430,
+        location: 'Aisle B-03 (Shelf 2)',
+        image: 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=500&q=80',
+        description: 'Infused with Moroccan Argan Oil and Keratin protein for smooth, frizz-free hair texture.',
+        brand: 'Botanics',
+        isBestSeller: true,
+        deliveryDays: 'Tomorrow, 5 PM'
+      },
+      {
+        id: 'SKU-BEAUTY-04',
+        name: 'DermaProtect SPF 50+ Matte Sunscreen Gel (100g)',
+        category: 'Beauty',
+        subCategory: 'Skincare',
+        initialStock: 150,
+        soldUnits: 120,
+        stock: 30,
+        allocated: 0,
+        reorderLevel: 20,
+        unitCost: 160,
+        unitPrice: 499,
+        offerDiscount: 30,
+        rating: 4.9,
+        reviewCount: 2300,
+        location: 'Aisle B-01 (Shelf 4)',
+        image: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=500&q=80',
+        description: 'Zero white cast oil-free broad spectrum PA++++ protection against UVA/UVB rays.',
+        brand: 'DermaShield',
+        isBestSeller: true,
+        deliveryDays: 'Tomorrow, 10 AM'
+      },
+
+      // DRESSES & FASHION
+      {
+        id: 'SKU-DRESS-01',
+        name: 'Women Designer Chiffon Floral Print Summer Maxi Dress',
+        category: 'Dresses',
+        subCategory: 'Western Wear',
+        initialStock: 100,
+        soldUnits: 75,
+        stock: 25,
+        allocated: 0,
+        reorderLevel: 15,
+        unitCost: 450,
+        unitPrice: 1999,
+        offerDiscount: 60,
+        rating: 4.7,
+        reviewCount: 1420,
+        location: 'Aisle F-01 (Rack 2)',
+        image: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=500&q=80',
+        description: 'Elegant flowy maxi dress crafted with breathable chiffon, flared hem, and stylish V-neck line.',
+        brand: 'UrbanFashion',
+        isBestSeller: true,
+        deliveryDays: 'Tomorrow, 3 PM'
+      },
+      {
+        id: 'SKU-DRESS-02',
+        name: 'Traditional Banarasi Silk Zari Work Saree with Blouse',
+        category: 'Dresses',
+        subCategory: 'Ethnic Wear',
+        initialStock: 60,
+        soldUnits: 48,
+        stock: 12,
+        allocated: 0,
+        reorderLevel: 10,
+        unitCost: 1200,
+        unitPrice: 4999,
+        offerDiscount: 65,
+        rating: 4.9,
+        reviewCount: 3100,
+        location: 'Aisle F-03 (Vault 1)',
+        image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=500&q=80',
+        description: 'Rich woven Banarasi art silk saree featuring intricate gold zari motif weave and unstitched blouse piece.',
+        brand: 'EthnicVibe',
+        isBestSeller: true,
+        deliveryDays: '2 Days'
+      },
+      {
+        id: 'SKU-DRESS-03',
+        name: 'Men 100% Pure Egyptian Cotton Slim Fit Formal Shirt',
+        category: 'Dresses',
+        subCategory: 'Menswear',
+        initialStock: 140,
+        soldUnits: 110,
+        stock: 30,
+        allocated: 0,
+        reorderLevel: 20,
+        unitCost: 380,
+        unitPrice: 1599,
+        offerDiscount: 50,
+        rating: 4.5,
+        reviewCount: 980,
+        location: 'Aisle F-02 (Bin 08)',
+        image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=500&q=80',
+        description: 'Wrinkle-resistant luxury weave formal shirt suitable for boardroom meetings and formal galas.',
+        brand: 'RoyalWear',
+        isBestSeller: false,
+        deliveryDays: 'Tomorrow, 11 AM'
+      },
+      {
+        id: 'SKU-DRESS-04',
+        name: 'Women Designer Anarkali Kurta Set with Dupatta',
+        category: 'Dresses',
+        subCategory: 'Ethnic Wear',
+        initialStock: 80,
+        soldUnits: 62,
+        stock: 18,
+        allocated: 0,
+        reorderLevel: 10,
+        unitCost: 700,
+        unitPrice: 2899,
+        offerDiscount: 55,
+        rating: 4.8,
+        reviewCount: 1890,
+        location: 'Aisle F-04 (Rack 1)',
+        image: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=500&q=80',
+        description: 'Georgette flared Anarkali suit with embroidery details and matching organza printed dupatta.',
+        brand: 'EthnicVibe',
+        isBestSeller: true,
+        deliveryDays: 'Tomorrow, 4 PM'
+      },
+
+      // SHOES & FOOTWEAR
+      {
+        id: 'SKU-SHOE-01',
+        name: 'ProRun Ultra Cushion Responsive Running Shoes',
+        category: 'Shoes',
+        subCategory: 'Sports Shoes',
+        initialStock: 90,
+        soldUnits: 72,
+        stock: 18,
+        allocated: 0,
+        reorderLevel: 12,
+        unitCost: 850,
+        unitPrice: 3499,
+        offerDiscount: 50,
+        rating: 4.8,
+        reviewCount: 2450,
+        location: 'Aisle S-01 (Rack 3)',
+        image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=500&q=80',
+        description: 'Engineered mesh upper with high-rebound Nitrogen-infused foam cushioning for marathon running.',
+        brand: 'AeroSport',
+        isBestSeller: true,
+        deliveryDays: 'Tomorrow, 1 PM'
+      },
+      {
+        id: 'SKU-SHOE-02',
+        name: 'Classic Genuine Leather Monk Strap Formal Shoes',
+        category: 'Shoes',
+        subCategory: 'Formal Shoes',
+        initialStock: 50,
+        soldUnits: 38,
+        stock: 12,
+        allocated: 0,
+        reorderLevel: 8,
+        unitCost: 1100,
+        unitPrice: 4299,
+        offerDiscount: 45,
+        rating: 4.6,
+        reviewCount: 670,
+        location: 'Aisle S-02 (Shelf 2)',
+        image: 'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=500&q=80',
+        description: 'Handcrafted full-grain leather shoe with memory foam footbed and anti-skid rubber sole.',
+        brand: 'RoyalWear',
+        isBestSeller: false,
+        deliveryDays: '2 Days'
+      },
+      {
+        id: 'SKU-SHOE-03',
+        name: 'StreetVibe Retro High-Top Casual Sneakers',
+        category: 'Shoes',
+        subCategory: 'Casual Shoes',
+        initialStock: 110,
+        soldUnits: 92,
+        stock: 18,
+        allocated: 0,
+        reorderLevel: 15,
+        unitCost: 650,
+        unitPrice: 2499,
+        offerDiscount: 52,
+        rating: 4.7,
+        reviewCount: 1890,
+        location: 'Aisle S-03 (Rack 1)',
+        image: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=500&q=80',
+        description: 'Iconic street style canvas high-tops with reinforced toe cap and vulcanized rubber sole.',
+        brand: 'UrbanStyle',
+        isBestSeller: true,
+        deliveryDays: 'Tomorrow, 6 PM'
+      },
+
+      // ELECTRONICS & MOBILES
+      {
+        id: 'SKU-ELEC-01',
+        name: 'Ultra Slim i9 14th Gen AI Workstation Laptop',
+        category: 'Electronics',
+        subCategory: 'Laptops',
+        initialStock: 25,
+        soldUnits: 18,
+        stock: 7,
+        allocated: 0,
+        reorderLevel: 5,
+        unitCost: 65000,
+        unitPrice: 99999,
+        offerDiscount: 18,
+        rating: 4.9,
+        reviewCount: 820,
+        location: 'Aisle A-03 (Rack 2)',
+        image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=500&q=80',
+        description: '32GB DDR5 RAM, 1TB NVMe Gen4 SSD, 16" QHD OLED 120Hz display with dedicated RTX 4070 GPU.',
+        brand: 'TechPro',
+        isBestSeller: true,
+        deliveryDays: 'Tomorrow, 10 AM'
+      },
+      {
+        id: 'SKU-ELEC-02',
+        name: 'Flagship 5G Smartphone (12GB RAM, 256GB Storage)',
+        category: 'Electronics',
+        subCategory: 'Mobiles',
+        initialStock: 80,
+        soldUnits: 65,
+        stock: 15,
+        allocated: 0,
+        reorderLevel: 10,
+        unitCost: 32000,
+        unitPrice: 49999,
+        offerDiscount: 22,
+        rating: 4.8,
+        reviewCount: 5200,
+        location: 'Aisle A-01 (Vault 2)',
+        image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80',
+        description: '200MP OIS Camera, Snapdragon 8 Gen 3 Processor, 5000mAh Battery with 120W HyperCharge.',
+        brand: 'NovaMobile',
+        isBestSeller: true,
+        deliveryDays: 'Tomorrow, 1 PM'
+      },
+      {
+        id: 'SKU-ELEC-03',
+        name: 'Active Noise Canceling Wireless Over-Ear Headphones',
+        category: 'Electronics',
+        subCategory: 'Audio',
+        initialStock: 70,
+        soldUnits: 58,
+        stock: 12,
+        allocated: 0,
+        reorderLevel: 10,
+        unitCost: 3500,
+        unitPrice: 8999,
+        offerDiscount: 40,
+        rating: 4.7,
+        reviewCount: 1450,
+        location: 'Aisle A-04 (Bin 02)',
+        image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=500&q=80',
+        description: '40mm Titanium drivers, 45 dB Hybrid ANC, 60-hour playtime with quick charge capabilities.',
+        brand: 'SoundPro',
+        isBestSeller: true,
+        deliveryDays: 'Tomorrow, 2 PM'
+      },
+      {
+        id: 'SKU-ELEC-04',
+        name: 'Ultra AMOLED Display Fitness Smartwatch with GPS',
+        category: 'Electronics',
+        subCategory: 'Wearables',
+        initialStock: 95,
+        soldUnits: 80,
+        stock: 15,
+        allocated: 0,
+        reorderLevel: 12,
+        unitCost: 1800,
+        unitPrice: 4999,
+        offerDiscount: 60,
+        rating: 4.6,
+        reviewCount: 2890,
+        location: 'Aisle A-02 (Bin 05)',
+        image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=500&q=80',
+        description: 'Always-On Retina AMOLED display, SpO2 & Heart Rate tracking, Bluetooth calling, 100+ sports modes.',
+        brand: 'TechPro',
+        isBestSeller: false,
+        deliveryDays: 'Tomorrow, 4 PM'
+      },
+
+      // COOKING & KITCHEN ESSENTIALS
+      {
+        id: 'SKU-COOK-01',
+        name: 'Tri-Ply Stainless Steel Heavy Induction Cookware Set',
+        category: 'Cooking',
+        subCategory: 'Cookware',
+        initialStock: 45,
+        soldUnits: 38,
+        stock: 7,
+        allocated: 0,
+        reorderLevel: 10,
+        unitCost: 1400,
+        unitPrice: 3499,
+        offerDiscount: 40,
+        rating: 4.9,
+        reviewCount: 2150,
+        location: 'Aisle K-01 (Rack 4)',
+        image: 'https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&w=500&q=80',
+        description: 'Induction & Gas compatible 3-layer heavy gauge cookware for even heat distribution without hot spots.',
+        brand: 'ChefCraft',
+        isBestSeller: true,
+        deliveryDays: 'Tomorrow, 11 AM'
+      },
+      {
+        id: 'SKU-COOK-02',
+        name: 'Digital Touch Smart Air Fryer (5.5 Liters, 1400W)',
+        category: 'Cooking',
+        subCategory: 'Appliances',
+        initialStock: 60,
+        soldUnits: 55,
+        stock: 5,
+        allocated: 0,
+        reorderLevel: 8,
+        unitCost: 2800,
+        unitPrice: 6999,
+        offerDiscount: 50,
+        rating: 4.8,
+        reviewCount: 3410,
+        location: 'Aisle K-04 (Rack 2)',
+        image: 'https://images.unsplash.com/photo-1585515320310-259814833e62?auto=format&fit=crop&w=500&q=80',
+        description: '95% less oil air-frying technology with 12 digital presets and 360-degree rapid circulation.',
+        brand: 'SmartKitchen',
+        isBestSeller: true,
+        deliveryDays: 'Tomorrow, 3 PM'
+      },
+      {
+        id: 'SKU-COOK-03',
+        name: 'Non-Stick Granite Dosa & Chapati Tawa (28cm)',
+        category: 'Cooking',
+        subCategory: 'Cookware',
+        initialStock: 110,
+        soldUnits: 88,
+        stock: 22,
+        allocated: 0,
+        reorderLevel: 15,
+        unitCost: 350,
+        unitPrice: 1199,
+        offerDiscount: 60,
+        rating: 4.5,
+        reviewCount: 1780,
+        location: 'Aisle K-02 (Bin 08)',
+        image: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=500&q=80',
+        description: '5-layer scratch resistant PFOA-free non-stick granite coating with sturdy soft-touch stay-cool handle.',
+        brand: 'ChefCraft',
+        isBestSeller: false,
+        deliveryDays: '2 Days'
+      },
+      {
+        id: 'SKU-COOK-04',
+        name: 'Barista Touch Espresso & Cappuccino Coffee Machine',
+        category: 'Cooking',
+        subCategory: 'Appliances',
+        initialStock: 40,
+        soldUnits: 32,
+        stock: 8,
+        allocated: 0,
+        reorderLevel: 6,
+        unitCost: 4500,
+        unitPrice: 11999,
+        offerDiscount: 42,
+        rating: 4.9,
+        reviewCount: 890,
+        location: 'Aisle K-03 (Rack 1)',
+        image: 'https://images.unsplash.com/photo-1517668808822-9e428824603b?auto=format&fit=crop&w=500&q=80',
+        description: '15-Bar Italian pump pressure system with high-pressure steam wand for café-quality latte art.',
+        brand: 'SmartKitchen',
+        isBestSeller: true,
+        deliveryDays: 'Tomorrow, 10 AM'
+      },
+
+      // HOME & LIVING
+      {
+        id: 'SKU-HOME-01',
+        name: 'All-Season Ultra Soft Microfiber Double Comforter',
+        category: 'Home',
+        subCategory: 'Bedding',
+        initialStock: 80,
+        soldUnits: 62,
+        stock: 18,
+        allocated: 0,
+        reorderLevel: 10,
+        unitCost: 750,
+        unitPrice: 2299,
+        offerDiscount: 58,
+        rating: 4.7,
+        reviewCount: 1670,
+        location: 'Aisle H-01 (Bin 03)',
+        image: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=500&q=80',
+        description: 'Hypoallergenic 300 GSM hollow siliconized microfiber fill with diamond box stitching pattern.',
+        brand: 'ComfortHome',
+        isBestSeller: true,
+        deliveryDays: 'Tomorrow, 2 PM'
+      }
+    ];
+
+    const INITIAL_ORDERS = [
+      {
+        id: '#ORD-9001',
+        customer: 'Suresh Kumar (Kakinada)',
+        skuId: 'SKU-COOK-01',
+        skuName: 'Tri-Ply Stainless Steel Heavy Induction Cookware Set',
+        qty: 4,
+        priority: 'URGENT',
+        priorityScore: 100,
+        status: 'PENDING',
+        allocated: 0,
+        shortage: 0,
+        pickingStep: 'PENDING',
+        createdAt: '10 mins ago',
+        totalPrice: 8397
+      },
+      {
+        id: '#ORD-9002',
+        customer: 'Ananya Reddy (Hyderabad)',
+        skuId: 'SKU-DRESS-02',
+        skuName: 'Traditional Banarasi Silk Zari Work Saree',
+        qty: 2,
+        priority: 'HIGH',
+        priorityScore: 80,
+        status: 'PENDING',
+        allocated: 0,
+        shortage: 0,
+        pickingStep: 'PENDING',
+        createdAt: '25 mins ago',
+        totalPrice: 3499
+      },
+      {
+        id: '#ORD-9003',
+        customer: 'Priya Sharma (Visakhapatnam)',
+        skuId: 'SKU-SHOE-01',
+        skuName: 'ProRun Ultra Cushion Responsive Running Shoes',
+        qty: 1,
+        priority: 'NORMAL',
+        priorityScore: 50,
+        status: 'PENDING',
+        allocated: 0,
+        shortage: 0,
+        pickingStep: 'PENDING',
+        createdAt: '40 mins ago',
+        totalPrice: 1749
+      }
+    ];
+
+    function App() {
+      const [viewMode, setViewMode] = useState('storefront'); // 'storefront' | 'warehouse' | 'analytics'
+      const [catalog, setCatalog] = useState(EXPANDED_CATALOG);
+      const [orders, setOrders] = useState(INITIAL_ORDERS);
+      const [cart, setCart] = useState([]);
+      const [wishlist, setWishlist] = useState([]);
+      const [compareList, setCompareList] = useState([]);
+      
+      const [isCartOpen, setIsCartOpen] = useState(false);
+      const [isWishlistOpen, setIsWishlistOpen] = useState(false);
+      const [isOrderTrackOpen, setIsOrderTrackOpen] = useState(false);
+      
+      const [selectedCategory, setSelectedCategory] = useState('ALL');
+      const [searchQuery, setSearchQuery] = useState('');
+      const [priceSort, setPriceSort] = useState('RECOMMENDED');
+      const [priceMax, setPriceMax] = useState(100000);
+      const [minRating, setMinRating] = useState(0);
+      const [selectedBrands, setSelectedBrands] = useState([]);
+
+      const [selectedProduct, setSelectedProduct] = useState(null);
+      const [notification, setNotification] = useState(null);
+      
+      // Coupons & Checkout
+      const [couponCode, setCouponCode] = useState('');
+      const [discountPercent, setDiscountPercent] = useState(0);
+
+      // Warehouse state variables
+      const [allocationLogs, setAllocationLogs] = useState([]);
+
+      // Flash Sale Countdown Timer
+      const [timeLeft, setTimeLeft] = useState({ hours: 4, minutes: 12, seconds: 35 });
+
+      useEffect(() => {
+        const timer = setInterval(() => {
+          setTimeLeft(prev => {
+            if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
+            if (prev.minutes > 0) return { ...prev, minutes: 59, seconds: 59 };
+            if (prev.hours > 0) return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
+            return prev;
+          });
+        }, 1000);
+        return () => clearInterval(timer);
+      }, []);
+
+      const showNotify = (msg, type = 'info') => {
+        setNotification({ msg, type });
+        setTimeout(() => setNotification(null), 4000);
+      };
+
+      const addToCart = (product, e) => {
+        if (e) e.stopPropagation();
+        if (product.stock <= 0) {
+          showNotify(`${product.name} is currently Out of Stock!`, 'warning');
+          return;
+        }
+
+        const existing = cart.find(item => item.id === product.id);
+        if (existing) {
+          if (existing.qty >= product.stock) {
+            showNotify(`Max stock limit reached (${product.stock} units)!`, 'warning');
+            return;
+          }
+          setCart(cart.map(item => item.id === product.id ? { ...item, qty: item.qty + 1 } : item));
+        } else {
+          setCart([...cart, { ...product, qty: 1 }]);
+        }
+        showNotify(`Added "${product.name.slice(0, 25)}..." to Cart!`, 'success');
+      };
+
+      const toggleWishlist = (product, e) => {
+        if (e) e.stopPropagation();
+        if (wishlist.some(item => item.id === product.id)) {
+          setWishlist(wishlist.filter(item => item.id !== product.id));
+          showNotify(`Removed from Wishlist`, 'info');
+        } else {
+          setWishlist([...wishlist, product]);
+          showNotify(`Saved to Wishlist ❤️`, 'success');
+        }
+      };
+
+      const toggleCompare = (product, e) => {
+        if (e) e.stopPropagation();
+        if (compareList.some(item => item.id === product.id)) {
+          setCompareList(compareList.filter(item => item.id !== product.id));
+        } else {
+          if (compareList.length >= 3) {
+            showNotify(`You can compare up to 3 items at a time!`, 'warning');
+            return;
+          }
+          setCompareList([...compareList, product]);
+          showNotify(`Added to Compare Tray`, 'info');
+        }
+      };
+
+      const updateCartQty = (productId, delta) => {
+        setCart(prev => prev.map(item => {
+          if (item.id === productId) {
+            const newQty = item.qty + delta;
+            if (newQty <= 0) return null;
+            if (newQty > item.stock) {
+              showNotify(`Stock limit reached for this item!`, 'warning');
+              return item;
+            }
+            return { ...item, qty: newQty };
+          }
+          return item;
+        }).filter(Boolean));
+      };
+
+      const removeFromCart = (productId) => {
+        setCart(cart.filter(item => item.id !== productId));
+        showNotify('Item removed from cart', 'info');
+      };
+
+      const applyCoupon = () => {
+        if (couponCode.toUpperCase() === 'HACKATHON20' || couponCode.toUpperCase() === 'FLIPKART20') {
+          setDiscountPercent(20);
+          showNotify('🎉 Coupon Applied! Extra 20% Discount unlocked.', 'success');
+        } else {
+          showNotify('Invalid coupon code. Try "HACKATHON20"', 'warning');
+        }
+      };
+
+      const handleCustomerCheckout = () => {
+        if (cart.length === 0) return;
+
+        // Deduct stock from warehouse catalog
+        let updatedCatalog = catalog.map(item => {
+          const cartItem = cart.find(c => c.id === item.id);
+          if (cartItem) {
+            return {
+              ...item,
+              stock: Math.max(0, item.stock - cartItem.qty),
+              soldUnits: item.soldUnits + cartItem.qty
+            };
+          }
+          return item;
+        });
+
+        // Add to order list
+        const newOrderId = `#ORD-${Math.floor(9000 + Math.random() * 1000)}`;
+        const baseTotal = cart.reduce((acc, i) => acc + (Math.round(i.unitPrice * (1 - i.offerDiscount / 100)) * i.qty), 0);
+        const finalTotal = Math.round(baseTotal * (1 - discountPercent / 100));
+        
+        const newOrder = {
+          id: newOrderId,
+          customer: 'Online Guest User (Express Fast-Track)',
+          skuId: cart[0].id,
+          skuName: cart[0].name,
+          qty: cart.reduce((acc, i) => acc + i.qty, 0),
+          priority: 'NORMAL',
+          priorityScore: 50,
+          status: 'READY_TO_DISPATCH',
+          allocated: cart.reduce((acc, i) => acc + i.qty, 0),
+          shortage: 0,
+          pickingStep: 'PICKING_COMPLETE',
+          createdAt: 'Just now',
+          totalPrice: finalTotal
+        };
+
+        setCatalog(updatedCatalog);
+        setOrders([newOrder, ...orders]);
+        setCart([]);
+        setDiscountPercent(0);
+        setCouponCode('');
+        setIsCartOpen(false);
+        showNotify(`🎉 Order ${newOrderId} Placed Successfully! Express Warehouse Dispatch triggered.`, 'success');
+      };
+
+      const runSmartAllocation = () => {
+        let updatedCatalog = [...catalog.map(item => ({ ...item }))];
+        let updatedOrders = [...orders.map(order => ({ ...order }))];
+        let logs = [];
+
+        // Sort orders by Priority Score Descending
+        updatedOrders.sort((a, b) => b.priorityScore - a.priorityScore);
+
+        updatedOrders.forEach(order => {
+          if (order.status === 'DISPATCHED') return;
+
+          let item = updatedCatalog.find(i => i.id === order.skuId);
+          if (!item) return;
+
+          if (item.stock >= order.qty) {
+            item.stock -= order.qty;
+            item.allocated += order.qty;
+            order.allocated = order.qty;
+            order.shortage = 0;
+            order.status = 'READY_TO_DISPATCH';
+            order.pickingStep = 'READY_FOR_PICKING';
+            logs.push(`✅ Order ${order.id} (${order.priority}): Allocated ${order.qty} units of ${item.name}. Remaining Stock: ${item.stock}`);
+          } else if (item.stock > 0) {
+            let allocatedQty = item.stock;
+            let shortageQty = order.qty - allocatedQty;
+            item.allocated += allocatedQty;
+            item.stock = 0;
+
+            order.allocated = allocatedQty;
+            order.shortage = shortageQty;
+            order.status = 'PARTIALLY_ALLOCATED';
+            order.pickingStep = 'READY_FOR_PICKING';
+
+            logs.push(`⚠️ Order ${order.id} (${order.priority}): PARTIAL ALLOCATION! ${allocatedQty}/${order.qty} allocated. Shortage: ${shortageQty} units.`);
+          } else {
+            order.allocated = 0;
+            order.shortage = order.qty;
+            order.status = 'ON_HOLD';
+            order.pickingStep = 'ON_HOLD';
+            logs.push(`🚫 Order ${order.id} (${order.priority}): Placed ON HOLD! Out of stock.`);
+          }
+        });
+
+        setCatalog(updatedCatalog);
+        setOrders(updatedOrders);
+        setAllocationLogs(logs);
+        showNotify('Smart AI Allocation Engine executed on warehouse orders!', 'warning');
+      };
+
+      const handleResetDemo = () => {
+        setCatalog(EXPANDED_CATALOG);
+        setOrders(INITIAL_ORDERS);
+        setCart([]);
+        setWishlist([]);
+        setCompareList([]);
+        setAllocationLogs([]);
+        showNotify('Full Catalog & Stock Levels Reset to Default!', 'success');
+      };
+
+      const availableBrands = useMemo(() => {
+        return Array.from(new Set(catalog.map(i => i.brand)));
+      }, [catalog]);
+
+      const filteredCatalog = useMemo(() => {
+        let result = catalog.filter(item => {
+          const matchesCat = selectedCategory === 'ALL' || item.category === selectedCategory;
+          const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                item.brand.toLowerCase().includes(searchQuery.toLowerCase());
+          const price = Math.round(item.unitPrice * (1 - item.offerDiscount / 100));
+          const matchesPrice = price <= priceMax;
+          const matchesRating = item.rating >= minRating;
+          const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(item.brand);
+
+          return matchesCat && matchesSearch && matchesPrice && matchesRating && matchesBrand;
+        });
+
+        if (priceSort === 'LOW_HIGH') {
+          result.sort((a, b) => (a.unitPrice * (1 - a.offerDiscount / 100)) - (b.unitPrice * (1 - b.offerDiscount / 100)));
+        } else if (priceSort === 'HIGH_LOW') {
+          result.sort((a, b) => (b.unitPrice * (1 - b.offerDiscount / 100)) - (a.unitPrice * (1 - a.offerDiscount / 100)));
+        } else if (priceSort === 'RATING') {
+          result.sort((a, b) => b.rating - a.rating);
+        } else if (priceSort === 'OFFER') {
+          result.sort((a, b) => b.offerDiscount - a.offerDiscount);
+        }
+
+        return result;
+      }, [catalog, selectedCategory, searchQuery, priceSort, priceMax, minRating, selectedBrands]);
+
+      // Cart metrics calculation
+      const cartOriginalTotal = useMemo(() => {
+        return cart.reduce((acc, item) => acc + (item.unitPrice * item.qty), 0);
+      }, [cart]);
+
+      const cartDiscountedSubtotal = useMemo(() => {
+        return cart.reduce((acc, item) => {
+          const price = Math.round(item.unitPrice * (1 - item.offerDiscount / 100));
+          return acc + (price * item.qty);
+        }, 0);
+      }, [cart]);
+
+      const cartFinalTotal = useMemo(() => {
+        return Math.round(cartDiscountedSubtotal * (1 - discountPercent / 100));
+      }, [cartDiscountedSubtotal, discountPercent]);
+
+      const totalSavings = cartOriginalTotal - cartFinalTotal;
+
+      return (
+        <div className="min-h-screen flex flex-col font-sans bg-fkBg">
+
+          {}
+          <header className="bg-fkBlue sticky top-0 z-40 text-white shadow-md">
+            
+            {/* TOP BAR */}
+            <div className="bg-fkBlueDark px-4 py-1 text-[11px] font-medium flex justify-between items-center border-b border-blue-600/50">
+              <div className="flex items-center space-x-4">
+                <span><i className="fa-solid fa-[#2874f0] fa-location-dot text-fkYellow mr-1"></i> Deliver to <strong>Kakinada 533001</strong></span>
+                <span className="hidden sm:inline text-slate-300">|</span>
+                <span className="hidden sm:inline font-semibold text-fkYellow">⚡ Express 1-Day Delivery Available</span>
+              </div>
+              <div className="flex items-center space-x-4">
+                <button onClick={() => setIsOrderTrackOpen(true)} className="hover:text-fkYellow transition flex items-center space-x-1">
+                  <i className="fa-solid fa-truck-fast"></i>
+                  <span>Track Orders ({orders.length})</span>
+                </button>
+                <span>|</span>
+                <button onClick={handleResetDemo} className="hover:text-fkYellow text-slate-200">
+                  <i className="fa-solid fa-rotate mr-1"></i> Reset Catalog
+                </button>
+              </div>
+            </div>
+
+            {/* MAIN NAVBAR */}
+            <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-4">
+              
+              {/* LOGO */}
+              <div className="flex items-center space-x-6">
+                <div onClick={() => { setViewMode('storefront'); setSelectedCategory('ALL'); }} className="cursor-pointer group flex flex-col">
+                  <div className="flex items-center space-x-1">
+                    <span className="text-xl font-black italic tracking-wider text-white">SmartStore</span>
+                    <span className="text-xs font-bold text-fkYellow italic bg-amber-500/20 px-1.5 py-0.5 rounded">Plus</span>
+                  </div>
+                  <span className="text-[10px] text-slate-200 group-hover:underline flex items-center space-x-1">
+                    <span>Explore</span>
+                    <span className="text-fkYellow font-bold">Flipkart & Amazon Deals</span>
+                    <i className="fa-solid fa-plus text-[8px] text-fkYellow"></i>
+                  </span>
+                </div>
+
+                {/* VIEW MODE TOGGLE BUTTONS */}
+                <div className="hidden lg:flex items-center bg-fkBlueDark rounded-lg p-1 text-xs font-semibold">
+                  <button
+                    onClick={() => setViewMode('storefront')}
+                    className={`px-3 py-1 rounded-md transition ${viewMode === 'storefront' ? 'bg-white text-fkBlue font-bold shadow' : 'text-slate-200 hover:text-white'}`}
+                  >
+                    <i className="fa-solid fa-store mr-1.5"></i> Customer Store
+                  </button>
+                  <button
+                    onClick={() => setViewMode('warehouse')}
+                    className={`px-3 py-1 rounded-md transition ${viewMode === 'warehouse' ? 'bg-fkYellow text-slate-900 font-bold shadow' : 'text-slate-200 hover:text-white'}`}
+                  >
+                    <i className="fa-solid fa-boxes-packing mr-1.5"></i> Supply Chain Ops
+                  </button>
+                </div>
+              </div>
+
+              {/* SEARCH BAR WITH AUTO-SUGGEST LOOK */}
+              <div className="flex-1 max-w-2xl relative">
+                <div className="relative flex items-center">
+                  <input
+                    type="text"
+                    placeholder="Search for Sarees, Running Shoes, Laptops, Vitamin C Serums, Air Fryer..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-white text-slate-900 placeholder-slate-400 text-xs px-4 py-2.5 rounded-sm focus:outline-none shadow-inner pr-10"
+                  />
+                  <button className="absolute right-3 text-fkBlue hover:text-fkBlueDark">
+                    <i className="fa-solid fa-magnifying-glass text-sm"></i>
+                  </button>
+                </div>
+              </div>
+
+              {/* ACTION BUTTONS (Wishlist, Cart, Login) */}
+              <div className="flex items-center space-x-5 text-xs font-bold">
+                <button
+                  onClick={() => setIsWishlistOpen(true)}
+                  className="relative flex items-center space-x-1 hover:text-fkYellow transition"
+                >
+                  <i className="fa-solid fa-heart text-base text-red-400"></i>
+                  <span className="hidden sm:inline">Wishlist</span>
+                  {wishlist.length > 0 && (
+                    <span className="bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                      {wishlist.length}
+                    </span>
+                  )}
+                </button>
+
+                {/* CART BUTTON WITH BADGE */}
+                <button
+                  onClick={() => setIsCartOpen(true)}
+                  className="relative flex items-center space-x-2 bg-fkBlueDark hover:bg-blue-800 px-3 py-1.5 rounded-sm border border-blue-400/30 transition"
+                >
+                  <i className="fa-solid fa-cart-shopping text-base text-fkYellow"></i>
+                  <span className="hidden sm:inline">Cart</span>
+                  {cart.length > 0 && (
+                    <span className="bg-fkOrange text-white text-[10px] px-1.5 py-0.5 rounded-full font-black badge-pulse">
+                      {cart.reduce((a, b) => a + b.qty, 0)}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* MOBILE VIEW TOGGLE */}
+            <div className="lg:hidden bg-fkBlueDark px-4 py-1.5 flex justify-between items-center text-xs font-semibold border-t border-blue-700">
+              <button 
+                onClick={() => setViewMode(viewMode === 'storefront' ? 'warehouse' : 'storefront')}
+                className="text-fkYellow underline flex items-center space-x-1"
+              >
+                <i className="fa-solid fa-arrows-rotate"></i>
+                <span>Switch to {viewMode === 'storefront' ? 'Warehouse Ops' : 'Customer Store'}</span>
+              </button>
+              <button onClick={() => setIsOrderTrackOpen(true)} className="text-white text-[11px]">
+                Orders ({orders.length})
+              </button>
+            </div>
+          </header>
+
+          {}
+          {viewMode === 'storefront' && (
+            <div className="bg-white border-b border-slate-200 shadow-sm sticky top-12 z-30">
+              <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between overflow-x-auto custom-scrollbar gap-4 text-xs font-bold text-slate-700">
+                {[
+                  { id: 'ALL', label: 'All Categories', icon: 'fa-cubes' },
+                  { id: 'Beauty', label: 'Beauty & Skincare', icon: 'fa-wand-magic-sparkles' },
+                  { id: 'Dresses', label: 'Dresses & Fashion', icon: 'fa-shirt' },
+                  { id: 'Shoes', label: 'Shoes & Footwear', icon: 'fa-shoe-prints' },
+                  { id: 'Electronics', label: 'Mobiles & Tech', icon: 'fa-laptop' },
+                  { id: 'Cooking', label: 'Kitchen & Cooking', icon: 'fa-utensils' },
+                  { id: 'Home', label: 'Home & Bedding', icon: 'fa-couch' }
+                ].map(cat => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-full transition whitespace-nowrap ${
+                      selectedCategory === cat.id
+                        ? 'bg-fkBlue text-white shadow'
+                        : 'hover:bg-slate-100 text-slate-600'
+                    }`}
+                  >
+                    <i className={`fa-solid ${cat.icon}`}></i>
+                    <span>{cat.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* NOTIFICATION TOAST */}
+          {notification && (
+            <div className={`px-4 py-2 text-xs font-bold text-center transition-all ${
+              notification.type === 'warning' ? 'bg-amber-500 text-white' :
+              notification.type === 'success' ? 'bg-fkGreen text-white' :
+              'bg-slate-800 text-white'
+            }`}>
+              <i className="fa-solid fa-circle-info mr-2"></i>
+              {notification.msg}
+            </div>
+          )}
+
+          {/* MAIN CONTENT AREA */}
+          <main className="flex-1 max-w-7xl w-full mx-auto p-4 space-y-4">
+
+            {}
+            {viewMode === 'storefront' && (
+              <div className="space-y-4">
+                
+                {/* PROMOTIONAL HERO BANNER WITH COUNTDOWN TIMER */}
+                <div className="bg-gradient-to-r from-fkBlueDark via-fkBlue to-indigo-800 rounded-md p-6 text-white shadow-lg relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                  <div className="max-w-2xl space-y-2 relative z-10">
+                    <div className="flex items-center space-x-2">
+                      <span className="bg-fkYellow text-slate-900 font-black text-[10px] uppercase px-2.5 py-0.5 rounded-sm">
+                        Big Billion & Great Indian Sale ⚡
+                      </span>
+                      <span className="bg-red-600 text-white font-bold text-[10px] px-2 py-0.5 rounded-sm flex items-center space-x-1">
+                        <i className="fa-solid fa-clock"></i>
+                        <span>Ends in {String(timeLeft.hours).padStart(2, '0')}h {String(timeLeft.minutes).padStart(2, '0')}m {String(timeLeft.seconds).padStart(2, '0')}s</span>
+                      </span>
+                    </div>
+
+                    <h1 className="text-2xl md:text-3xl font-black tracking-tight leading-tight">
+                      Up to 70% OFF on Dresses, Running Shoes, Tech & Serums!
+                    </h1>
+                    <p className="text-xs text-slate-100">
+                      Use coupon <strong className="bg-fkYellow text-slate-900 px-1 rounded">HACKATHON20</strong> for additional 20% Instant Discount at Checkout!
+                    </p>
+                    
+                    <div className="pt-2 flex flex-wrap gap-2 text-xs">
+                      <span className="bg-white/20 px-3 py-1 rounded-sm border border-white/30 font-semibold">✓ 100% Original Brands</span>
+                      <span className="bg-white/20 px-3 py-1 rounded-sm border border-white/30 font-semibold">✓ Free 7-Day Replacement</span>
+                      <span className="bg-white/20 px-3 py-1 rounded-sm border border-white/30 font-semibold">✓ Express Warehouse Dispatch</span>
+                    </div>
+                  </div>
+
+                  <div className="hidden md:flex flex-col items-center bg-white/10 p-4 rounded-lg border border-white/20 backdrop-blur-sm space-y-1">
+                    <div className="text-3xl font-black text-fkYellow">20+ SKUs</div>
+                    <div className="text-[11px] font-semibold text-slate-200 uppercase tracking-wider">Ready to Dispatch</div>
+                  </div>
+                </div>
+
+                {/* PRODUCT GRID LAYOUT WITH SIDEBAR FILTERS */}
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                  
+                  {/* SIDEBAR FILTERS */}
+                  <div className="bg-white p-4 rounded-sm border border-slate-200 shadow-sm space-y-4 text-xs h-fit">
+                    <div className="flex items-center justify-between border-b pb-2">
+                      <h3 className="font-bold text-sm text-slate-800">Filters</h3>
+                      <button
+                        onClick={() => {
+                          setSelectedCategory('ALL');
+                          setPriceMax(100000);
+                          setMinRating(0);
+                          setSelectedBrands([]);
+                          setSearchQuery('');
+                        }}
+                        className="text-fkBlue font-bold text-[11px] hover:underline"
+                      >
+                        CLEAR ALL
+                      </button>
+                    </div>
+
+                    {/* PRICE SLIDER */}
+                    <div className="space-y-2">
+                      <div className="font-bold text-slate-700">Max Price: ₹{priceMax.toLocaleString()}</div>
+                      <input
+                        type="range"
+                        min="500"
+                        max="100000"
+                        step="500"
+                        value={priceMax}
+                        onChange={(e) => setPriceMax(Number(e.target.value))}
+                        className="w-full accent-fkBlue"
+                      />
+                    </div>
+
+                    {/* MINIMUM RATING */}
+                    <div className="space-y-1.5 border-t pt-3">
+                      <div className="font-bold text-slate-700">Minimum Rating</div>
+                      {[4.5, 4.0, 3.5].map(star => (
+                        <label key={star} className="flex items-center space-x-2 text-slate-600 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="rating"
+                            checked={minRating === star}
+                            onChange={() => setMinRating(star)}
+                            className="accent-fkBlue"
+                          />
+                          <span className="flex items-center space-x-1 font-medium">
+                            <span>{star}★ & above</span>
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+
+                    {/* BRANDS CHECKBOXES */}
+                    <div className="space-y-1.5 border-t pt-3">
+                      <div className="font-bold text-slate-700">Filter by Brand</div>
+                      <div className="max-h-40 overflow-y-auto custom-scrollbar space-y-1">
+                        {availableBrands.map(brand => (
+                          <label key={brand} className="flex items-center space-x-2 text-slate-600 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={selectedBrands.includes(brand)}
+                              onChange={(e) => {
+                                if (e.target.checked) setSelectedBrands([...selectedBrands, brand]);
+                                else setSelectedBrands(selectedBrands.filter(b => b !== brand));
+                              }}
+                              className="accent-fkBlue rounded-sm"
+                            />
+                            <span>{brand}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {}
+                  <div className="lg:col-span-3 space-y-3">
+                    
+                    {/* SORTING BAR */}
+                    <div className="bg-white p-3 rounded-sm fk-shadow flex flex-wrap items-center justify-between gap-3 text-xs">
+                      <div className="font-bold text-slate-700">
+                        Showing <span className="text-fkBlue">{filteredCatalog.length}</span> Products
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <span className="text-slate-500 font-medium">Sort By:</span>
+                        {[
+                          { id: 'RECOMMENDED', label: 'Popularity' },
+                          { id: 'LOW_HIGH', label: 'Price: Low-High' },
+                          { id: 'HIGH_LOW', label: 'Price: High-Low' },
+                          { id: 'OFFER', label: 'Discount' },
+                          { id: 'RATING', label: 'Ratings' }
+                        ].map(sortOption => (
+                          <button
+                            key={sortOption.id}
+                            onClick={() => setPriceSort(sortOption.id)}
+                            className={`font-semibold px-2 py-1 rounded-sm transition ${
+                              priceSort === sortOption.id
+                                ? 'text-fkBlue font-bold border-b-2 border-fkBlue'
+                                : 'text-slate-600 hover:text-fkBlue'
+                            }`}
+                          >
+                            {sortOption.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* PRODUCT CARDS GRID */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      {filteredCatalog.map(product => {
+                        const effectivePrice = Math.round(product.unitPrice * (1 - product.offerDiscount / 100));
+                        const isWishlisted = wishlist.some(i => i.id === product.id);
+                        const isCompared = compareList.some(i => i.id === product.id);
+
+                        return (
+                          <div
+                            key={product.id}
+                            onClick={() => setSelectedProduct(product)}
+                            className="bg-white rounded-sm border border-slate-200 p-3 hover:shadow-xl transition flex flex-col justify-between cursor-pointer group relative"
+                          >
+                            {/* BADGES & WISHLIST BUTTON */}
+                            <div className="absolute top-3 left-3 right-3 z-10 flex justify-between items-start">
+                              <div className="flex flex-col space-y-1">
+                                {product.offerDiscount > 0 && (
+                                  <span className="bg-fkGreen text-white text-[10px] font-black px-1.5 py-0.5 rounded-sm shadow">
+                                    {product.offerDiscount}% OFF
+                                  </span>
+                                )}
+                                {product.isBestSeller && (
+                                  <span className="bg-fkYellow text-slate-900 text-[9px] font-bold px-1.5 py-0.5 rounded-sm shadow">
+                                    #1 Bestseller
+                                  </span>
+                                )}
+                              </div>
+
+                              <button
+                                onClick={(e) => toggleWishlist(product, e)}
+                                className="bg-white/80 backdrop-blur-sm p-1.5 rounded-full shadow hover:scale-110 transition text-slate-400 hover:text-red-500"
+                              >
+                                <i className={`fa-solid fa-heart ${isWishlisted ? 'text-red-500' : ''}`}></i>
+                              </button>
+                            </div>
+
+                            {/* IMAGE */}
+                            <div className="relative h-44 w-full overflow-hidden mb-2 bg-slate-50 flex items-center justify-center rounded-sm">
+                              <img
+                                src={product.image}
+                                alt={product.name}
+                                className="h-full w-full object-cover group-hover:scale-105 transition duration-300"
+                              />
+                            </div>
+
+                            {/* DETAILS */}
+                            <div className="space-y-1 flex-1">
+                              <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">
+                                {product.brand} • {product.subCategory}
+                              </div>
+                              
+                              <h3 className="font-semibold text-xs text-slate-800 line-clamp-2 group-hover:text-fkBlue transition">
+                                {product.name}
+                              </h3>
+
+                              {/* RATING */}
+                              <div className="flex items-center space-x-2 pt-1">
+                                <span className="bg-fkGreen text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm flex items-center space-x-1">
+                                  <span>{product.rating}</span>
+                                  <i className="fa-solid fa-star text-[8px]"></i>
+                                </span>
+                                <span className="text-[10px] text-slate-400 font-medium">({product.reviewCount.toLocaleString()})</span>
+                              </div>
+
+                              {/* PRICE */}
+                              <div className="flex items-baseline space-x-2 pt-1">
+                                <span className="text-base font-black text-slate-900">₹{effectivePrice.toLocaleString()}</span>
+                                <span className="text-xs text-slate-400 line-through">₹{product.unitPrice.toLocaleString()}</span>
+                              </div>
+
+                              {/* STOCK LEVEL */}
+                              <div className="text-[11px] pt-1">
+                                {product.stock === 0 ? (
+                                  <span className="text-red-600 font-bold">Out of Stock</span>
+                                ) : product.stock <= product.reorderLevel ? (
+                                  <span className="text-amber-600 font-bold">Only {product.stock} left in stock!</span>
+                                ) : (
+                                  <span className="text-fkGreen font-semibold">In Stock ({product.stock} units)</span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* BUTTON ACTIONS */}
+                            <div className="pt-2 border-t border-slate-100 flex items-center space-x-2 mt-2">
+                              <button
+                                onClick={(e) => addToCart(product, e)}
+                                disabled={product.stock === 0}
+                                className={`flex-1 py-2 text-xs font-bold rounded-sm transition flex items-center justify-center space-x-1 ${
+                                  product.stock === 0
+                                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                                    : 'bg-fkOrange text-white hover:bg-orange-600 shadow'
+                                }`}
+                              >
+                                <i className="fa-solid fa-cart-plus"></i>
+                                <span>ADD TO CART</span>
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {}
+            {viewMode === 'warehouse' && (
+              <div className="space-y-4">
+                
+                {/* WAREHOUSE METRICS HEADER */}
+                <div className="bg-slate-900 text-white rounded-md p-5 border border-slate-800 space-y-4 shadow-xl">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                      <span className="text-xs font-bold text-fkYellow uppercase tracking-widest">Enterprise Fulfillment Tower</span>
+                      <h2 className="text-xl font-black text-white">Supply Chain Stock & Smart Allocation Engine</h2>
+                      <p className="text-xs text-slate-400">Real-time inventory levels, automated priority allocation, and stock shortage alerts.</p>
+                    </div>
+
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={runSmartAllocation}
+                        className="bg-gradient-to-r from-fkOrange to-amber-500 hover:opacity-95 text-white font-black px-4 py-2.5 rounded-sm text-xs shadow-lg flex items-center space-x-2"
+                      >
+                        <i className="fa-solid fa-bolt"></i>
+                        <span>EXECUTE AI ALLOCATION</span>
+                      </button>
+                      <button
+                        onClick={handleResetDemo}
+                        className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-3 py-2.5 rounded-sm text-xs border border-slate-700"
+                      >
+                        Reset Stock
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* KPI STAT CARDS */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                    <div className="bg-slate-950 p-3 rounded border border-slate-800">
+                      <div className="text-slate-400">Total Catalog SKUs</div>
+                      <div className="text-xl font-black text-white mt-1">{catalog.length} Items</div>
+                    </div>
+                    <div className="bg-slate-950 p-3 rounded border border-slate-800">
+                      <div className="text-slate-400">Active Stock Units</div>
+                      <div className="text-xl font-black text-emerald-400 mt-1">
+                        {catalog.reduce((acc, i) => acc + i.stock, 0)} units
+                      </div>
+                    </div>
+                    <div className="bg-slate-950 p-3 rounded border border-slate-800">
+                      <div className="text-slate-400">Low Stock SKUs</div>
+                      <div className="text-xl font-black text-amber-400 mt-1">
+                        {catalog.filter(i => i.stock <= i.reorderLevel).length} SKUs
+                      </div>
+                    </div>
+                    <div className="bg-slate-950 p-3 rounded border border-slate-800">
+                      <div className="text-slate-400">Total Orders Pending</div>
+                      <div className="text-xl font-black text-fkYellow mt-1">{orders.length} Orders</div>
+                    </div>
+                  </div>
+
+                  {/* WAREHOUSE CATALOG TABLE */}
+                  <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-left text-xs text-slate-300">
+                      <thead className="bg-slate-950 text-slate-400 uppercase font-bold text-[10px]">
+                        <tr>
+                          <th className="p-3">SKU & Product</th>
+                          <th className="p-3">Category</th>
+                          <th className="p-3">Selling Price</th>
+                          <th className="p-3">Units Sold</th>
+                          <th className="p-3">Stock Remaining</th>
+                          <th className="p-3">Aisle Location</th>
+                          <th className="p-3 text-right">Quick Restock</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800">
+                        {catalog.map(item => (
+                          <tr key={item.id} className="hover:bg-slate-800/60">
+                            <td className="p-3 font-semibold text-white">
+                              <div className="font-bold text-white text-xs">{item.name}</div>
+                              <div className="font-mono text-[10px] text-fkYellow">{item.id}</div>
+                            </td>
+                            <td className="p-3 text-slate-300 font-bold">{item.category}</td>
+                            <td className="p-3 font-bold text-emerald-400">
+                              ₹{Math.round(item.unitPrice * (1 - item.offerDiscount / 100))}
+                            </td>
+                            <td className="p-3 font-bold text-slate-300">{item.soldUnits}</td>
+                            <td className="p-3">
+                              <span className={`font-black ${item.stock === 0 ? 'text-red-400' : item.stock <= item.reorderLevel ? 'text-amber-400' : 'text-emerald-400'}`}>
+                                {item.stock} units
+                              </span>
+                            </td>
+                            <td className="p-3 font-mono text-[10px] text-slate-400">{item.location}</td>
+                            <td className="p-3 text-right">
+                              <button
+                                onClick={() => {
+                                  setCatalog(catalog.map(c => c.id === item.id ? { ...c, stock: c.stock + 20 } : c));
+                                  showNotify(`Restocked +20 units for ${item.name.slice(0, 20)}!`, 'success');
+                                }}
+                                className="bg-fkBlue hover:bg-blue-600 text-white font-bold px-2.5 py-1 rounded-sm text-[11px]"
+                              >
+                                + Restock 20
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* EXECUTION LOGS */}
+                  {allocationLogs.length > 0 && (
+                    <div className="bg-slate-950 p-4 rounded-md border border-slate-800 space-y-2">
+                      <div className="text-xs font-bold text-emerald-400 flex items-center space-x-2">
+                        <i className="fa-solid fa-terminal"></i>
+                        <span>AI Allocation Engine Decision Log</span>
+                      </div>
+                      <div className="font-mono text-[11px] space-y-1 text-slate-300 max-h-48 overflow-y-auto custom-scrollbar">
+                        {allocationLogs.map((log, i) => <div key={i}>{log}</div>)}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+          </main>
+
+          {}
+          {isCartOpen && (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-end">
+              <div className="bg-white w-full max-w-md h-full flex flex-col justify-between shadow-2xl relative">
+                
+                {/* CART HEADER */}
+                <div className="bg-fkBlue text-white p-4 flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <i className="fa-solid fa-cart-shopping"></i>
+                    <h2 className="font-bold text-sm">Shopping Cart ({cart.reduce((a, b) => a + b.qty, 0)} items)</h2>
+                  </div>
+                  <button onClick={() => setIsCartOpen(false)} className="text-white hover:text-fkYellow">
+                    <i className="fa-solid fa-xmark text-lg"></i>
+                  </button>
+                </div>
+
+                {/* CART ITEMS LIST */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
+                  {cart.length === 0 ? (
+                    <div className="text-center py-16 space-y-3">
+                      <i className="fa-solid fa-basket-shopping text-5xl text-slate-300"></i>
+                      <div className="text-sm font-bold text-slate-700">Your Shopping Cart is Empty!</div>
+                      <p className="text-xs text-slate-400">Explore Beauty, Dresses, Running Shoes & Tech products to add items.</p>
+                      <button
+                        onClick={() => setIsCartOpen(false)}
+                        className="bg-fkBlue text-white font-bold text-xs px-6 py-2 rounded-sm shadow"
+                      >
+                        Start Shopping
+                      </button>
+                    </div>
+                  ) : (
+                    cart.map(item => {
+                      const effectivePrice = Math.round(item.unitPrice * (1 - item.offerDiscount / 100));
+                      return (
+                        <div key={item.id} className="bg-slate-50 border border-slate-200 p-3 rounded-sm flex gap-3 relative">
+                          <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-sm border" />
+                          <div className="flex-1 space-y-1">
+                            <h4 className="font-bold text-xs text-slate-800 line-clamp-1">{item.name}</h4>
+                            <div className="text-[10px] text-slate-400 font-medium">{item.brand}</div>
+                            
+                            <div className="flex items-baseline space-x-2">
+                              <span className="font-black text-xs text-slate-900">₹{effectivePrice.toLocaleString()}</span>
+                              <span className="text-[10px] text-slate-400 line-through">₹{item.unitPrice.toLocaleString()}</span>
+                            </div>
+
+                            {/* QUANTITY CONTROLS */}
+                            <div className="flex items-center space-x-3 pt-1">
+                              <div className="flex items-center border border-slate-300 rounded-sm bg-white">
+                                <button
+                                  onClick={() => updateCartQty(item.id, -1)}
+                                  className="px-2 py-0.5 text-xs text-slate-600 hover:bg-slate-100"
+                                >
+                                  -
+                                </button>
+                                <span className="px-3 py-0.5 text-xs font-bold text-slate-800">{item.qty}</span>
+                                <button
+                                  onClick={() => updateCartQty(item.id, 1)}
+                                  className="px-2 py-0.5 text-xs text-slate-600 hover:bg-slate-100"
+                                >
+                                  +
+                                </button>
+                              </div>
+                              <button
+                                onClick={() => removeFromCart(item.id)}
+                                className="text-[11px] text-red-600 font-semibold hover:underline"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* PRICE BREAKDOWN & COUPON CODE */}
+                {cart.length > 0 && (
+                  <div className="border-t border-slate-200 p-4 bg-slate-50 space-y-3">
+                    
+                    {/* COUPON INPUT */}
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Coupon (Try HACKATHON20)"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value)}
+                        className="flex-1 text-xs px-3 py-1.5 border border-slate-300 rounded-sm uppercase font-mono"
+                      />
+                      <button
+                        onClick={applyCoupon}
+                        className="bg-slate-900 text-white font-bold text-xs px-3 py-1.5 rounded-sm hover:bg-slate-800"
+                      >
+                        Apply
+                      </button>
+                    </div>
+
+                    <div className="space-y-1 text-xs">
+                      <div className="flex justify-between text-slate-600">
+                        <span>Original Price</span>
+                        <span>₹{cartOriginalTotal.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-fkGreen font-semibold">
+                        <span>Total Savings</span>
+                        <span>- ₹{totalSavings.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-slate-600">
+                        <span>Delivery Fee</span>
+                        <span className="text-fkGreen font-bold">FREE</span>
+                      </div>
+                      <div className="flex justify-between font-black text-sm text-slate-900 border-t pt-2">
+                        <span>Total Payable</span>
+                        <span className="text-fkBlue">₹{cartFinalTotal.toLocaleString()}</span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handleCustomerCheckout}
+                      className="w-full bg-fkOrange hover:bg-orange-600 text-white font-black py-3 rounded-sm text-xs shadow-lg uppercase tracking-wider flex items-center justify-center space-x-2"
+                    >
+                      <i className="fa-solid fa-bolt"></i>
+                      <span>PLACE ORDER (₹{cartFinalTotal.toLocaleString()})</span>
+                    </button>
+                  </div>
+                )}
+
+              </div>
+            </div>
+          )}
+
+          {}
+          {isWishlistOpen && (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-end">
+              <div className="bg-white w-full max-w-md h-full flex flex-col justify-between shadow-2xl relative">
+                <div className="bg-red-600 text-white p-4 flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <i className="fa-solid fa-heart"></i>
+                    <h2 className="font-bold text-sm">My Saved Wishlist ({wishlist.length})</h2>
+                  </div>
+                  <button onClick={() => setIsWishlistOpen(false)} className="text-white hover:text-slate-200">
+                    <i className="fa-solid fa-xmark text-lg"></i>
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
+                  {wishlist.length === 0 ? (
+                    <div className="text-center py-16 space-y-3">
+                      <i className="fa-solid fa-heart-crack text-5xl text-slate-300"></i>
+                      <div className="text-sm font-bold text-slate-700">No Wishlisted Items Yet!</div>
+                    </div>
+                  ) : (
+                    wishlist.map(item => (
+                      <div key={item.id} className="bg-slate-50 border p-3 rounded flex gap-3 items-center justify-between">
+                        <img src={item.image} className="w-14 h-14 object-cover rounded" />
+                        <div className="flex-1">
+                          <div className="font-bold text-xs">{item.name}</div>
+                          <div className="text-xs font-black text-slate-900">₹{Math.round(item.unitPrice * (1 - item.offerDiscount / 100))}</div>
+                        </div>
+                        <button
+                          onClick={(e) => addToCart(item, e)}
+                          className="bg-fkOrange text-white text-xs font-bold px-3 py-1.5 rounded"
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {}
+          {isOrderTrackOpen && (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center p-4">
+              <div className="bg-white w-full max-w-2xl rounded-md p-5 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto custom-scrollbar">
+                <div className="flex items-center justify-between border-b pb-3">
+                  <div className="flex items-center space-x-2 text-fkBlue font-black text-base">
+                    <i className="fa-solid fa-truck-fast"></i>
+                    <span>Live Order Dispatch Tracker</span>
+                  </div>
+                  <button onClick={() => setIsOrderTrackOpen(false)} className="text-slate-400 hover:text-slate-700">
+                    <i className="fa-solid fa-xmark text-lg"></i>
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {orders.map(ord => (
+                    <div key={ord.id} className="border border-slate-200 rounded p-4 space-y-3 bg-slate-50">
+                      <div className="flex justify-between items-center text-xs border-b pb-2">
+                        <div>
+                          <span className="font-bold text-slate-800">{ord.id}</span>
+                          <span className="text-slate-500 ml-2">({ord.customer})</span>
+                        </div>
+                        <span className="font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded">
+                          {ord.status}
+                        </span>
+                      </div>
+
+                      <div className="text-xs font-semibold text-slate-700">
+                        Item: {ord.skuName} (x{ord.qty})
+                      </div>
+
+                      {/* DISPATCH PROGRESS STEPS */}
+                      <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-bold text-slate-500 pt-2">
+                        <div className="bg-emerald-500 text-white p-1 rounded">1. Placed</div>
+                        <div className="bg-emerald-500 text-white p-1 rounded">2. Picked</div>
+                        <div className="bg-emerald-500 text-white p-1 rounded">3. Packed</div>
+                        <div className="bg-amber-500 text-white p-1 rounded">4. Out for Delivery</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {}
+          {selectedProduct && (
+            <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-sm max-w-2xl w-full p-6 space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+                <button
+                  onClick={() => setSelectedProduct(null)}
+                  className="absolute top-4 right-4 text-slate-400 hover:text-slate-700"
+                >
+                  <i className="fa-solid fa-xmark text-lg"></i>
+                </button>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* LEFT: IMAGE */}
+                  <div className="bg-slate-50 border border-slate-200 p-4 rounded-sm flex flex-col items-center justify-center">
+                    <img src={selectedProduct.image} alt={selectedProduct.name} className="max-h-64 object-cover rounded-sm" />
+                    <div className="mt-4 flex space-x-2 w-full">
+                      <button
+                        onClick={(e) => { addToCart(selectedProduct, e); setSelectedProduct(null); }}
+                        className="flex-1 bg-fkOrange text-white font-bold py-2.5 text-xs rounded-sm hover:bg-orange-600 shadow"
+                      >
+                        ADD TO CART
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* RIGHT: SPECS & DETAILS */}
+                  <div className="space-y-3">
+                    <div className="text-xs text-fkBlue font-bold uppercase">{selectedProduct.brand} • {selectedProduct.category}</div>
+                    <h2 className="text-base font-bold text-slate-900">{selectedProduct.name}</h2>
+                    
+                    <div className="flex items-center space-x-2">
+                      <span className="bg-fkGreen text-white text-xs font-bold px-2 py-0.5 rounded-sm flex items-center space-x-1">
+                        <span>{selectedProduct.rating}</span>
+                        <i className="fa-solid fa-star text-[9px]"></i>
+                      </span>
+                      <span className="text-xs text-slate-500">({selectedProduct.reviewCount} reviews)</span>
+                    </div>
+
+                    <div className="flex items-baseline space-x-3 bg-slate-50 p-3 rounded-sm border border-slate-200">
+                      <span className="text-2xl font-black text-slate-900">
+                        ₹{Math.round(selectedProduct.unitPrice * (1 - selectedProduct.offerDiscount / 100)).toLocaleString()}
+                      </span>
+                      <span className="text-xs text-slate-400 line-through">₹{selectedProduct.unitPrice.toLocaleString()}</span>
+                      <span className="text-xs font-black text-fkGreen">{selectedProduct.offerDiscount}% OFF</span>
+                    </div>
+
+                    <div className="text-xs text-slate-600 space-y-1.5 border-t border-b border-slate-200 py-3">
+                      <div className="font-bold text-slate-800">Description & Specs:</div>
+                      <p className="leading-relaxed text-slate-600">{selectedProduct.description}</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                      <div className="bg-slate-50 p-2 border rounded">
+                        <span className="text-slate-400 block">Delivery Time</span>
+                        <span className="font-bold text-slate-800">{selectedProduct.deliveryDays}</span>
+                      </div>
+                      <div className="bg-slate-50 p-2 border rounded">
+                        <span className="text-slate-400 block">Warehouse Stock</span>
+                        <span className="font-bold text-emerald-600">{selectedProduct.stock} units available</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          )}
+
+          {}
+          <footer className="bg-slate-900 text-slate-400 text-xs py-8 border-t border-slate-800 mt-10">
+            <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div>
+                <div className="text-white font-black text-base italic mb-2">SmartStore Pro</div>
+                <p className="text-slate-400 text-[11px] leading-relaxed">
+                  Enterprise E-Commerce Hackathon Platform powered by real-time Supply Chain AI & Flipkart-Amazon hybrid interface.
+                </p>
+              </div>
+              <div>
+                <h4 className="text-white font-bold mb-2">Featured Collections</h4>
+                <ul className="space-y-1 text-[11px]">
+                  <li>Beauty (Serum, Lipsticks, Sunscreen)</li>
+                  <li>Dresses & Sarees (Banarasi, Maxi Dresses)</li>
+                  <li>Shoes & Footwear (Running Shoes, Formal)</li>
+                  <li>Mobiles & Laptops (i9 AI Workstation)</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-white font-bold mb-2">Enterprise Engine</h4>
+                <ul className="space-y-1 text-[11px]">
+                  <li>Real-time Priority Allocation Engine</li>
+                  <li>Fast-Track Order Dispatch</li>
+                  <li>Automated Restock Triggers</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-white font-bold mb-2">Customer Assistance</h4>
+                <p className="text-[11px] text-slate-400">100% Purchase Guarantee, Express Delivery in Kakinada & All India.</p>
+                <div className="mt-3 text-fkYellow font-bold">24x7 Hackathon Support Live</div>
+              </div>
+            </div>
+          </footer>
+
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
